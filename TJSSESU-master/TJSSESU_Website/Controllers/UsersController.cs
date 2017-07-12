@@ -290,8 +290,14 @@ namespace TJSSESU_Website.Controllers
         }
 
         [HttpPost]
-        public DateTime CreateTask()
+        public ActionResult CreateTask()
         {
+            bool resultAll = true;
+            string publisherId = "1552607";
+            string taskTitle = Request.Form["title"];
+            string executorsId = Request.Form["IDs"];
+            string tag = Request.Form["belongTo"];
+            DateTime publishedDate = DateTime.Now;
             var stringDate = Request.Form["data"];
             string[] splitStringDate = stringDate.Split('/');
             if (splitStringDate[0].Length == 1)
@@ -304,7 +310,144 @@ namespace TJSSESU_Website.Controllers
            }
            stringDate = string.Join("/", splitStringDate);
             DateTime date = DateTime.ParseExact(stringDate, "MM/dd/yyyy", System.Globalization.CultureInfo.CurrentCulture);
-            return date;
+            DateTime deadlineDate = date;
+            string description = Request.Form["description"];
+            bool idJudge = JudgeExecutors(executorsId, publisherId);
+            if (idJudge)
+            {
+                var newTask = new Task
+                {
+                    taskTitle = taskTitle,
+                    introduction = description,
+                    publishDate = publishedDate,
+                    deadlineDate = deadlineDate,
+                    executeStatement = 1,
+                    SID = publisherId,
+                    tag = tag
+                };
+                if (ModelState.IsValid)
+                {
+                    db.tasks.Add(newTask);
+                    db.SaveChanges();
+                }
+                string[] splitExecutorsId = executorsId.Split(' ');
+                for (int i = 0; i < splitExecutorsId.Length; i++)
+                {
+                    var newExecuteTask = new ExecuteTask
+                    {
+                        SID = splitExecutorsId[i],
+                        executeStatement = 1,
+                        taskID = newTask.taskID
+                    };
+                    if (ModelState.IsValid)
+                    {
+                        db.tasks.Add(newTask);
+                        db.SaveChanges();
+                    }
+                }
+            }
+            else
+            {
+                resultAll = false;
+            }
+            if (resultAll)
+            {
+                return Redirect("/Users/TaskResult");
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public ActionResult CreateTaskSuccessful()
+        {
+            return View();
+        }
+        public ActionResult CreateTaskFailed()
+        {
+            return View();
+        }
+
+        private bool JudgeExecutors(string executorsId, string publisherId)
+        {
+            string[] splitExecutorsId = executorsId.Split(' ');
+            string tempId;
+            bool tempJudge;
+            for (int i = 0; i < splitExecutorsId.Length; i++)
+            {
+                tempId = splitExecutorsId[i];
+                tempJudge = JudgeAnExecutor(tempId, publisherId);
+                if (!tempJudge)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool JudgeAnExecutor(string executorId, string publisherId)
+        {
+            bool deptJudge = false;
+            bool posJudge = false;
+            bool lawJudge = false;
+            var publisher = from u in db.users
+                            from p in db.positions
+                            where u.SID == publisherId && u.posName == p.posName
+                            select new
+                            {
+                                u.SID,
+                                u.name,
+                                u.posName,
+                                u.deptName,
+                                p.pClass
+                            };
+            var executor = from u in db.users
+                           from p in db.positions
+                           where u.SID == executorId && u.posName == p.posName
+                           select new
+                           {
+                               u.SID,
+                               u.name,
+                               u.posName,
+                               u.deptName,
+                               p.pClass
+                           };
+            var publisherList = publisher.ToList();
+            var executorList = executor.ToList();
+            if(executorList.Count() == 0)
+            {
+                return false;
+            }
+            else
+            {
+                lawJudge = true;
+            }
+            if(publisherList[0].deptName == "主席团")
+            {
+                deptJudge = true;
+            }
+            else
+            {
+                if(publisherList[0].deptName != executorList[0].deptName)
+                {
+                    return false;
+                }
+                else
+                {
+                    deptJudge = true;
+                }
+            }
+            if (publisherList[0].pClass <= executorList[0].pClass)
+            {
+                return false;
+            }
+            else
+            {
+                posJudge = true;
+            }
+
+            return (lawJudge && deptJudge && posJudge);
         }
     }
 }
