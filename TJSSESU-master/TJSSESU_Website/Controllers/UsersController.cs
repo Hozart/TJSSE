@@ -290,12 +290,21 @@ namespace TJSSESU_Website.Controllers
         }
 
         [HttpPost]
-        public String CreateTask()
+        public DateTime CreateTask()
         {
-            var newDate = Request.Form["data"];
-            Console.Write(newDate);
-            var stringNewDate = newDate.ToString();
-            return newDate;
+            var stringDate = Request.Form["data"];
+            string[] splitStringDate = stringDate.Split('/');
+            if (splitStringDate[0].Length == 1)
+            {
+                splitStringDate[0] = "0" + splitStringDate[0];
+            }
+           if(splitStringDate[1].Length == 1)
+           {
+               splitStringDate[1] = "0" + splitStringDate[1];
+           }
+           stringDate = string.Join("/", splitStringDate);
+            DateTime date = DateTime.ParseExact(stringDate, "MM/dd/yyyy", System.Globalization.CultureInfo.CurrentCulture);
+            return date;
         }
     }
 }
