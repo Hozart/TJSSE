@@ -136,22 +136,44 @@ namespace TJSSESU_Website.Controllers
             base.Dispose(disposing);
         }
 
-        public ActionResult TasksReceived()
+        public ActionResult TasksReceived(int? id=1)
         {
-            ViewBag.TaskTitlesNotFinished = new List<string>();
-            ViewBag.TaskDeadlineNotFinished = new List<DateTime>();
-            ViewBag.TaskPublishTimeNotFinished = new List<DateTime>();
-            ViewBag.TaskExecutorsNotFinished = new List<List<String>>();
-            ViewBag.TaskTagNotFinished = new List<string>();
-            ViewBag.TaskStatementNotFinished = new List<int>();
-            ViewBag.TaskIntroductionNotFinished = new List<string>();
-            ViewBag.TaskTitlesFinished = new List<string>();
-            ViewBag.TaskDeadlineFinished = new List<DateTime>();
-            ViewBag.TaskPublishTimeFinished = new List<DateTime>();
-            ViewBag.TaskExecutorsFinished = new List<List<String>>();
-            ViewBag.TaskTagFinished = new List<string>();
-            ViewBag.TaskStatementFinished = new List<int>();
-            ViewBag.TaskIntroductionFinished = new List<string>();
+            var ReceivedTaskIdNotFinished = new List<int>();
+            var ReceivedTaskTitlesNotFinished = new List<string>();
+            var ReceivedTaskDeadlineNotFinished = new List<DateTime>();
+            var ReceivedTaskPublishTimeNotFinished = new List<DateTime>();
+            var ReceivedTaskExecutorsNotFinished = new List<List<String>>();
+            var ReceivedTaskTagNotFinished = new List<string>();
+            var ReceivedTaskStatementNotFinished = new List<int>();
+            var ReceivedTaskIntroductionNotFinished = new List<string>();
+            var ReceivedTaskIdFinished = new List<int>();
+            var ReceivedTaskTitlesFinished = new List<string>();
+            var ReceivedTaskDeadlineFinished = new List<DateTime>();
+            var ReceivedTaskPublishTimeFinished = new List<DateTime>();
+            var ReceivedTaskExecutorsFinished = new List<List<String>>();
+            var ReceivedTaskTagFinished = new List<string>();
+            var ReceivedTaskStatementFinished = new List<int>();
+            var ReceivedTaskIntroductionFinished = new List<string>();
+
+            const int pageSize = 5;
+            int countNotFinished, countFinished, countTotal, beginNum;
+            int pageTotal;
+            countNotFinished = ReceivedTaskIdNotFinished.Count;
+            countFinished = ReceivedTaskIdFinished.Count;
+            countTotal = countFinished + countNotFinished;
+            pageTotal = (int)Math.Ceiling((double)(countTotal / pageSize));
+
+            ViewBag.ReceivedTaskIdPresentPage = new int[pageSize];
+            ViewBag.ReceivedTaskTitlesPresentPage = new string[pageSize];
+            ViewBag.ReceivedTaskDeadlinePresentPage = new DateTime[pageSize];
+            ViewBag.ReceivedTaskPublishTimePresentPage = new DateTime[pageSize];
+            ViewBag.ReceivedTaskExecutorsPresentPage = new List<string>[pageSize];
+            ViewBag.ReceivedTaskTagPresentPage = new string[pageSize];
+            ViewBag.ReceivedTaskStatementPresentPage = new int[pageSize];
+            ViewBag.ReceivedTaskIntroductionPresentPage = new string[pageSize];
+            ViewBag.PageNow = (int)id;
+            ViewBag.PageTotal = pageTotal;
+
             string userId = "1552635";
             //NotFinished
             var executesNotFinished = from u in db.executeTasks
@@ -160,10 +182,11 @@ namespace TJSSESU_Website.Controllers
                            select u;
             foreach(var item in executesNotFinished)
             {
-                ViewBag.TaskTitlesNotFinished.Add(item.task.taskTitle);
-                ViewBag.TaskDeadlineNotFinished.Add(item.task.deadlineDate);
-                ViewBag.TaskPublishTimeNotFinished.Add(item.task.publishDate);
-                //ViewBag.TaskExecutorNotFinished.Add
+                ReceivedTaskIdNotFinished.Add(item.taskID);
+                ReceivedTaskTitlesNotFinished.Add(item.task.taskTitle);
+                ReceivedTaskDeadlineNotFinished.Add(item.task.deadlineDate);
+                ReceivedTaskPublishTimeNotFinished.Add(item.task.publishDate);
+                //ReceivedTaskExecutorNotFinished.Add
                 var executorsNotFinished = from u in db.users
                                            from e in executesNotFinished
                                            where e.taskID == item.taskID && u.SID == e.SID
@@ -173,10 +196,10 @@ namespace TJSSESU_Website.Controllers
                 {
                     tempList.Add(executors.name);
                 }
-                ViewBag.TaskExecutorsNotFinished.Add(tempList);
-                ViewBag.TaskTagNotFinished.Add(item.task.tag);
-                ViewBag.TaskStatementNotFinished.Add(item.task.executeStatement);
-                ViewBag.TaskIntroductionNotFinished.Add(item.task.introduction);
+                ReceivedTaskExecutorsNotFinished.Add(tempList);
+                ReceivedTaskTagNotFinished.Add(item.task.tag);
+                ReceivedTaskStatementNotFinished.Add(item.task.executeStatement);
+                ReceivedTaskIntroductionNotFinished.Add(item.task.introduction);
             }
             //Finished
             var executesFinished = from u in db.executeTasks
@@ -185,10 +208,11 @@ namespace TJSSESU_Website.Controllers
                                       select u;
             foreach (var item in executesFinished)
             {
-                ViewBag.TaskTitlesFinished.Add(item.task.taskTitle);
-                ViewBag.TaskDeadlineFinished.Add(item.task.deadlineDate);
-                ViewBag.TaskPublishTimeFinished.Add(item.task.publishDate);
-                //ViewBag.TaskExecutorFinished.Add
+                ReceivedTaskIdFinished.Add(item.taskID);
+                ReceivedTaskTitlesFinished.Add(item.task.taskTitle);
+                ReceivedTaskDeadlineFinished.Add(item.task.deadlineDate);
+                ReceivedTaskPublishTimeFinished.Add(item.task.publishDate);
+                //ReceivedTaskExecutorFinished.Add
                 var executorsFinished = from u in db.users
                                            from e in executesFinished
                                            where e.taskID == item.taskID && u.SID == e.SID
@@ -198,30 +222,121 @@ namespace TJSSESU_Website.Controllers
                 {
                     tempList.Add(executors.name);
                 }
-                ViewBag.TaskExecutorsFinished.Add(tempList);
-                ViewBag.TaskTagFinished.Add(item.task.tag);
-                ViewBag.TaskStatementFinished.Add(item.task.executeStatement);
-                ViewBag.TaskIntroductionFinished.Add(item.task.introduction);
+                ReceivedTaskExecutorsFinished.Add(tempList);
+                ReceivedTaskTagFinished.Add(item.task.tag);
+                ReceivedTaskStatementFinished.Add(item.task.executeStatement);
+                ReceivedTaskIntroductionFinished.Add(item.task.introduction);
             }
+
+            if (id < 1)
+                id =1;
+            if (id > pageTotal)
+                id = pageTotal;
+            beginNum = pageSize * ((int)id - 1);
+            if((beginNum + pageSize) <= countNotFinished)
+            {
+                //从notFinished中抽取 pageSize个数据出来
+                for (int i = 0; i < pageSize; i++)
+                {
+                    ViewBag.ReceivedTaskIdPresentPage.Add(ReceivedTaskIdNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskTitlesPresentPage.Add(ReceivedTaskTitlesNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskDeadlinePresentPage.Add(ReceivedTaskDeadlineNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskPublishTimePresentPage.Add(ReceivedTaskPublishTimeNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskExecutorsPresentPage.Add(ReceivedTaskExecutorsNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskTagPresentPage.Add(ReceivedTaskTagNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskStatementPresentPage.Add(ReceivedTaskStatementNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskIntroductionPresentPage.Add(ReceivedTaskIntroductionNotFinished[beginNum + i]);
+                }
+            }
+            else if(beginNum <= (countNotFinished - 1))
+            {
+                //从notFinished中抽取 (countNotFinished - 1 - beginCount - 1 + 1)个数据
+                //再从Finished中抽取剩下的数量
+                int notFinishedAddCount = (countNotFinished - 1) - beginNum + 1;
+                int finishedAddCount = (((beginNum + pageSize) <= countTotal) ? (beginNum + pageSize) : (countTotal))
+                    - countNotFinished;
+                for (int i = 0; i < notFinishedAddCount; i++)
+                {
+                    ViewBag.ReceivedTaskIdPresentPage.Add(ReceivedTaskIdNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskTitlesPresentPage.Add(ReceivedTaskTitlesNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskDeadlinePresentPage.Add(ReceivedTaskDeadlineNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskPublishTimePresentPage.Add(ReceivedTaskPublishTimeNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskExecutorsPresentPage.Add(ReceivedTaskExecutorsNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskTagPresentPage.Add(ReceivedTaskTagNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskStatementPresentPage.Add(ReceivedTaskStatementNotFinished[beginNum + i]);
+                    ViewBag.ReceivedTaskIntroductionPresentPage.Add(ReceivedTaskIntroductionNotFinished[beginNum + i]);
+                }
+                for (int i = 0; i < finishedAddCount; i++)
+                {
+                    ViewBag.ReceivedTaskIdPresentPage.Add(ReceivedTaskIdFinished[i]);
+                    ViewBag.ReceivedTaskTitlesPresentPage.Add(ReceivedTaskTitlesFinished[i]);
+                    ViewBag.ReceivedTaskDeadlinePresentPage.Add(ReceivedTaskDeadlineFinished[i]);
+                    ViewBag.ReceivedTaskPublishTimePresentPage.Add(ReceivedTaskPublishTimeFinished[i]);
+                    ViewBag.ReceivedTaskExecutorsPresentPage.Add(ReceivedTaskExecutorsFinished[i]);
+                    ViewBag.ReceivedTaskTagPresentPage.Add(ReceivedTaskTagFinished[i]);
+                    ViewBag.ReceivedTaskStatementPresentPage.Add(ReceivedTaskStatementFinished[i]);
+                    ViewBag.ReceivedTaskIntroductionPresentPage.Add(ReceivedTaskIntroductionFinished[i]);
+                }
+             }
+            else 
+            {
+                int finishedAddCount = (((beginNum + pageSize) <= countTotal) ? (beginNum + pageSize) : (countTotal))
+                   - countNotFinished;
+                beginNum = beginNum - countNotFinished;
+                for (int i = 0; i < finishedAddCount; i++)
+                {
+                    ViewBag.ReceivedTaskIdPresentPage.Add(ReceivedTaskIdFinished[beginNum + 1]);
+                    ViewBag.ReceivedTaskTitlesPresentPage.Add(ReceivedTaskTitlesFinished[beginNum + 1]);
+                    ViewBag.ReceivedTaskDeadlinePresentPage.Add(ReceivedTaskDeadlineFinished[beginNum + 1]);
+                    ViewBag.ReceivedTaskPublishTimePresentPage.Add(ReceivedTaskPublishTimeFinished[beginNum + 1]);
+                    ViewBag.ReceivedTaskExecutorsPresentPage.Add(ReceivedTaskExecutorsFinished[beginNum + 1]);
+                    ViewBag.ReceivedTaskTagPresentPage.Add(ReceivedTaskTagFinished[beginNum + 1]);
+                    ViewBag.ReceivedTaskStatementPresentPage.Add(ReceivedTaskStatementFinished[beginNum + 1]);
+                    ViewBag.ReceivedTaskIntroductionPresentPage.Add(ReceivedTaskIntroductionFinished[beginNum + 1]);
+                }
+            }
+
             return View();
         }
 
-        public ActionResult TasksPublish()
+        public ActionResult TasksPublish(int? id=1)
         {
-            ViewBag.PublishTaskTitlesNotFinished = new List<string>();
-            ViewBag.PublishTaskDeadlineNotFinished = new List<DateTime>();
-            ViewBag.PublishTaskPublishTimeNotFinished = new List<DateTime>();
-            ViewBag.PublishTaskExecutorsNotFinished = new List<List<String>>();
-            ViewBag.PublishTaskTagNotFinished = new List<string>();
-            ViewBag.PublishTaskStatementNotFinished = new List<int>();
-            ViewBag.PublishTaskIntroductionNotFinished = new List<string>();
-            ViewBag.PublishTaskTitlesFinished = new List<string>();
-            ViewBag.PublishTaskDeadlineFinished = new List<DateTime>();
-            ViewBag.PublishTaskPublishTimeFinished = new List<DateTime>();
-            ViewBag.PublishTaskExecutorsFinished = new List<List<String>>();
-            ViewBag.PublishTaskTagFinished = new List<string>();
-            ViewBag.PublishTaskStatementFinished = new List<int>();
-            ViewBag.PublishTaskIntroductionFinished = new List<string>();
+            var PublishTaskIdNotFinished = new List<int>();
+            var PublishTaskTitlesNotFinished = new List<string>();
+            var PublishTaskDeadlineNotFinished = new List<DateTime>();
+            var PublishTaskPublishTimeNotFinished = new List<DateTime>();
+            var PublishTaskExecutorsNotFinished = new List<List<String>>();
+            var PublishTaskTagNotFinished = new List<string>();
+            var PublishTaskStatementNotFinished = new List<int>();
+            var PublishTaskIntroductionNotFinished = new List<string>();
+            var PublishTaskIdFinished = new List<int>();
+            var PublishTaskTitlesFinished = new List<string>();
+            var PublishTaskDeadlineFinished = new List<DateTime>();
+            var PublishTaskPublishTimeFinished = new List<DateTime>();
+            var PublishTaskExecutorsFinished = new List<List<String>>();
+            var PublishTaskTagFinished = new List<string>();
+            var PublishTaskStatementFinished = new List<int>();
+            var PublishTaskIntroductionFinished = new List<string>();
+
+            const int pageSize = 5;
+            int countNotFinished, countFinished, countTotal, beginNum;
+            int pageTotal;
+            countNotFinished = PublishTaskIdNotFinished.Count;
+            countFinished = PublishTaskIdFinished.Count;
+            countTotal = countFinished + countNotFinished;
+            pageTotal = (int)Math.Ceiling((double)(countTotal / pageSize));
+
+            ViewBag.ReceivedTaskIdPresentPage = new int[pageSize];
+            ViewBag.ReceivedTaskTitlesPresentPage = new string[pageSize];
+            ViewBag.ReceivedTaskDeadlinePresentPage = new DateTime[pageSize];
+            ViewBag.ReceivedTaskPublishTimePresentPage = new DateTime[pageSize];
+            ViewBag.ReceivedTaskExecutorsPresentPage = new List<string>[pageSize];
+            ViewBag.ReceivedTaskTagPresentPage = new string[pageSize];
+            ViewBag.ReceivedTaskStatementPresentPage = new int[pageSize];
+            ViewBag.ReceivedTaskIntroductionPresentPage = new string[pageSize];
+            ViewBag.PageNow = (int)id;
+            ViewBag.PageTotal = pageTotal;
+
             string userId = "1552635";
             //NotFinished
             var executesNotFinished = from u in db.executeTasks
@@ -231,10 +346,10 @@ namespace TJSSESU_Website.Controllers
                                       select u;
             foreach (var item in executesNotFinished)
             {
-                ViewBag.PublishTaskTitlesNotFinished.Add(item.task.taskTitle);
-                ViewBag.PublishTaskDeadlineNotFinished.Add(item.task.deadlineDate);
-                ViewBag.PublishTaskPublishTimeNotFinished.Add(item.task.publishDate);
-                //ViewBag.PublishTaskExecutorNotFinished.Add
+                PublishTaskTitlesNotFinished.Add(item.task.taskTitle);
+                PublishTaskDeadlineNotFinished.Add(item.task.deadlineDate);
+                PublishTaskPublishTimeNotFinished.Add(item.task.publishDate);
+                //PublishTaskExecutorNotFinished.Add
                 var executorsNotFinished = from u in db.users
                                            from e in executesNotFinished
                                            where e.taskID == item.taskID && u.SID == e.SID
@@ -244,10 +359,10 @@ namespace TJSSESU_Website.Controllers
                 {
                     tempList.Add(executors.name);
                 }
-                ViewBag.PublishTaskExecutorNotFinished.Add(tempList);
-                ViewBag.PublishTaskTagNotFinished.Add(item.task.tag);
-                ViewBag.PublishTaskStatementNotFinished.Add(item.task.executeStatement);
-                ViewBag.PublishTaskIntroductionNotFinished.Add(item.task.introduction);
+                PublishTaskExecutorsNotFinished.Add(tempList);
+                PublishTaskTagNotFinished.Add(item.task.tag);
+                PublishTaskStatementNotFinished.Add(item.task.executeStatement);
+                PublishTaskIntroductionNotFinished.Add(item.task.introduction);
             }
             //Finished
             var executesFinished = from u in db.executeTasks
@@ -257,10 +372,10 @@ namespace TJSSESU_Website.Controllers
                                    select u;
             foreach (var item in executesFinished)
             {
-                ViewBag.PublishTaskTitlesFinished.Add(item.task.taskTitle);
-                ViewBag.PublishTaskDeadlineFinished.Add(item.task.deadlineDate);
-                ViewBag.PublishTaskPublishTimeFinished.Add(item.task.publishDate);
-                //ViewBag.PublishTaskExecutorFinished.Add
+                PublishTaskTitlesFinished.Add(item.task.taskTitle);
+                PublishTaskDeadlineFinished.Add(item.task.deadlineDate);
+                PublishTaskPublishTimeFinished.Add(item.task.publishDate);
+                //PublishTaskExecutorFinished.Add
                 var executorsFinished = from u in db.users
                                         from e in executesFinished
                                         where e.taskID == item.taskID && u.SID == e.SID
@@ -270,11 +385,80 @@ namespace TJSSESU_Website.Controllers
                 {
                     tempList.Add(executors.name);
                 }
-                ViewBag.PublishTaskExecutorFinished.Add(tempList);
-                ViewBag.PublishTaskTagFinished.Add(item.task.tag);
-                ViewBag.PublishTaskStatementFinished.Add(item.task.executeStatement);
-                ViewBag.PublishTaskIntroductionFinished.Add(item.task.introduction);
+                PublishTaskExecutorsFinished.Add(tempList);
+                PublishTaskTagFinished.Add(item.task.tag);
+                PublishTaskStatementFinished.Add(item.task.executeStatement);
+                PublishTaskIntroductionFinished.Add(item.task.introduction);
             }
+
+            if (id < 1)
+                id = 1;
+            if (id > pageTotal)
+                id = pageTotal;
+            beginNum = pageSize * ((int)id - 1);
+            if ((beginNum + pageSize) <= countNotFinished)
+            {
+                //从notFinished中抽取 pageSize个数据出来
+                for (int i = 0; i < pageSize; i++)
+                {
+                    ViewBag.PublishTaskIdPresentPage.Add(PublishTaskIdNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskTitlesPresentPage.Add(PublishTaskTitlesNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskDeadlinePresentPage.Add(PublishTaskDeadlineNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskPublishTimePresentPage.Add(PublishTaskPublishTimeNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskExecutorsPresentPage.Add(PublishTaskExecutorsNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskTagPresentPage.Add(PublishTaskTagNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskStatementPresentPage.Add(PublishTaskStatementNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskIntroductionPresentPage.Add(PublishTaskIntroductionNotFinished[beginNum + i]);
+                }
+            }
+            else if (beginNum <= (countNotFinished - 1))
+            {
+                //从notFinished中抽取 (countNotFinished - 1 - beginCount - 1 + 1)个数据
+                //再从Finished中抽取剩下的数量
+                int notFinishedAddCount = (countNotFinished - 1) - beginNum + 1;
+                int finishedAddCount = (((beginNum + pageSize) <= countTotal) ? (beginNum + pageSize) : (countTotal))
+                    - countNotFinished;
+                for (int i = 0; i < notFinishedAddCount; i++)
+                {
+                    ViewBag.PublishTaskIdPresentPage.Add(PublishTaskIdNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskTitlesPresentPage.Add(PublishTaskTitlesNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskDeadlinePresentPage.Add(PublishTaskDeadlineNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskPublishTimePresentPage.Add(PublishTaskPublishTimeNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskExecutorsPresentPage.Add(PublishTaskExecutorsNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskTagPresentPage.Add(PublishTaskTagNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskStatementPresentPage.Add(PublishTaskStatementNotFinished[beginNum + i]);
+                    ViewBag.PublishTaskIntroductionPresentPage.Add(PublishTaskIntroductionNotFinished[beginNum + i]);
+                }
+                for (int i = 0; i < finishedAddCount; i++)
+                {
+                    ViewBag.PublishTaskIdPresentPage.Add(PublishTaskIdFinished[i]);
+                    ViewBag.PublishTaskTitlesPresentPage.Add(PublishTaskTitlesFinished[i]);
+                    ViewBag.PublishTaskDeadlinePresentPage.Add(PublishTaskDeadlineFinished[i]);
+                    ViewBag.PublishTaskPublishTimePresentPage.Add(PublishTaskPublishTimeFinished[i]);
+                    ViewBag.PublishTaskExecutorsPresentPage.Add(PublishTaskExecutorsFinished[i]);
+                    ViewBag.PublishTaskTagPresentPage.Add(PublishTaskTagFinished[i]);
+                    ViewBag.PublishTaskStatementPresentPage.Add(PublishTaskStatementFinished[i]);
+                    ViewBag.PublishTaskIntroductionPresentPage.Add(PublishTaskIntroductionFinished[i]);
+                }
+            }
+            else
+            {
+                int finishedAddCount = (((beginNum + pageSize) <= countTotal) ? (beginNum + pageSize) : (countTotal))
+                   - countNotFinished;
+                beginNum = beginNum - countNotFinished;
+                for (int i = 0; i < finishedAddCount; i++)
+                {
+                    ViewBag.PublishTaskIdPresentPage.Add(PublishTaskIdFinished[beginNum + 1]);
+                    ViewBag.PublishTaskTitlesPresentPage.Add(PublishTaskTitlesFinished[beginNum + 1]);
+                    ViewBag.PublishTaskDeadlinePresentPage.Add(PublishTaskDeadlineFinished[beginNum + 1]);
+                    ViewBag.PublishTaskPublishTimePresentPage.Add(PublishTaskPublishTimeFinished[beginNum + 1]);
+                    ViewBag.PublishTaskExecutorsPresentPage.Add(PublishTaskExecutorsFinished[beginNum + 1]);
+                    ViewBag.PublishTaskTagPresentPage.Add(PublishTaskTagFinished[beginNum + 1]);
+                    ViewBag.PublishTaskStatementPresentPage.Add(PublishTaskStatementFinished[beginNum + 1]);
+                    ViewBag.PublishTaskIntroductionPresentPage.Add(PublishTaskIntroductionFinished[beginNum + 1]);
+                }
+            }
+
             return View();
         }
 
