@@ -1,77 +1,150 @@
-﻿@{
+﻿@using System.Web.UI.WebControls
+@{
     Layout = "../Shared/TaskLayout.cshtml";
     Page.Title = "反馈";
+    var count = 0;
 }
-
 <div class="uk-container uk-margin-top uk-margin-large-bottom uk-container-center" >
     <!-- 内容 -->
     <div>
-        <div class="uk-card uk-card-default uk-card-header ">
-            <div class="uk-clearfix">
-                <div class="uk-float-left">
-                    <h2 class="uk-h2">标题</h2>
-                </div>qeqwqeq
-                <div class="uk-float-right uk-margin-right">
-                    <h2 class="uk-h2">时间</h2>
+        @{
+            var i = 0;
+            foreach (var Title in ViewBag.TaskTitlesNotFinished)
+            {
+                    <div class="uk-card uk-card-default uk-card-header ">
+                <div class="uk-clearfix">
+                    <div class="uk-float-left">
+                        <h2 class="uk-h2">@Title</h2>
+                    </div>
+                    <div class="uk-float-right uk-margin-right">
+                        <h2 class="uk-h2">@ViewBag.TaskPublishTimeNotFinished[i] - @ViewBag.TaskDeadlineNotFinished[i]</h2>
+                    </div>
+                </div>
+                <!-- 内容 -->
+            </div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <div class="uk-grid-small" uk-grid>
+                    <div class="uk-float-left uk-width-1-2@m">
+                        <div class="uk-card-small uk-card-default uk-card-body uk-margin-small uk-card-hover">
+                            <!--<div class="uk-card-badge uk-label">Person</div>-->
+                            <h3 class="uk-card-title">参与人员</h3>
+                            <p>@{
+                                   foreach (var name in ViewBag.TaskExecutorsNotFinished[i])
+                                   {
+                                       @name
+                                   }
+                               }</p>
+                        </div>
+                        <div class="uk-card-small uk-card-default uk-card-body uk-margin-small uk-card-hover">
+                            <!--<div class="uk-card-badge uk-label">Activity</div>-->
+                            <h3 class="uk-card-title">所属活动</h3>
+                            <p>@ViewBag.TaskTagNotFinished[i]</p>
+                        </div>
+                        <div class="uk-card-small uk-card-default uk-card-body uk-margin-small uk-card-hover">
+                            <!--<div class="uk-card-badge uk-label">Activity</div>-->
+                            <h3 class="uk-card-title">任务状态</h3>
+                            @if ((ViewBag.TaskStatementNotFinished[i])==0)
+                            {
+                                <p>已完成</p>
+                            }
+                            else if ((ViewBag.TaskStatementNotFinished[i]) == 1)
+                            {
+                                <p>待完成</p>
+                            }
+                            else
+                            {        
+                                <p>待审核</p>
+                            }
+                        </div>
+                    </div>
+                    <div class="uk-float-right uk-width-1-2@m">
+                        <div class="uk-card uk-card-default uk-card-body">
+                            <div class="uk-card-badge uk-label">detail</div>
+                            <h3 class="uk-card-title">详情</h3>
+                            <p>@ViewBag.TaskIntroductionNotFinished[i]</p>
+                        </div>
+                        @if ((ViewBag.PublishTaskStatementNotFinished[i])==1)
+                        {
+                            <button class="uk-button uk-button-primary uk-margin uk-float-right" id="submitBt" value="@ViewBag.TaskIDNotFinished[i]">Submit</button>
+                        }
+                        else
+                        {        
+                            <button class="uk-button uk-margin uk-float-right" disabled="disabled">Submitted</button>
+                        }
+                    </div>
                 </div>
             </div>
-            <!-- 内容 -->
-        </div>
-        <div class="uk-card uk-card-default uk-card-body">
-            <div class="uk-grid-small" uk-grid>
-                <div class="uk-float-left uk-width-1-2@m">
-                    <div class="uk-card-small uk-card-default uk-card-body uk-margin-small uk-card-hover">
-                        <!--<div class="uk-card-badge uk-label">Person</div>-->
-                        <h3 class="uk-card-title">参与人员</h3>
-                        <p>胡嘉鑫，王柠，吕岩松</p>
-                    </div>
-                    <div class="uk-card-small uk-card-default uk-card-body uk-margin-small uk-card-hover">
-                        <!--<div class="uk-card-badge uk-label">Activity</div>-->
-                        <h3 class="uk-card-title">所属活动</h3>
-                        <p>学习</p>
-                    </div>
-                    <div class="uk-card-small uk-card-default uk-card-body uk-margin-small uk-card-hover">
-                        <!--<div class="uk-card-badge uk-label">Activity</div>-->
-                        <h3 class="uk-card-title">任务状态</h3>
-                        <p>正在进行</p>
-                    </div>
-                </div>
-                <div class="uk-float-right uk-width-1-2@m">
-                    <div class="uk-card uk-card-default uk-card-body">
-                        <div class="uk-card-badge uk-label">detail</div>
-                        <h3 class="uk-card-title">详情</h3>
-                        <p> Lorem ipsum color sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                            Lorem ipsum color sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                            Lorem ipsum color sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                            Lorem ipsum color sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-                        </p>
-                    </div>
-                    @using (Html.BeginForm("SubmitTask", "Users", FormMethod.Post)) {
-                    <input style="display=none;" name="taskId" />
-                    <button class="uk-button uk-button-primary uk-margin uk-float-right" id="checkBt" type="submit">Submit</button>
-                    }
-                </div>
-            </div>
-        </div>
+            }
+        }
     </div>
 </div>
 
 <!-- 底部 -->
 <div class="uk-margin">
+    
+    @if (ViewBag.TotalNum > 11)
+    {
         <ul class="uk-pagination uk-flex-center" uk-margin>
-            <li><a href="#"><span uk-pagination-previous></span></a></li>
-            <li><a href="#">1</a></li>
-            <li class="uk-disabled"><span>...</span></li>
-            <li><a href="#">4</a></li>
-            <li><a href="#">5</a></li>
-            <li><a href="#">6</a></li>
-            <li class="uk-active"><span>7</span></li>
-            <li><a href="#">8</a></li>
-            <li><a href="#">9</a></li>
-            <li><a href="#">10</a></li>
-            <li class="uk-disabled"><span>...</span></li>
-            <li><a href="#">20</a></li>
-            <li><a href="#"><span uk-pagination-next></span></a></li>
+            @if (ViewBag.CurrentNum != 1)
+            {
+            <li><a href="#?page=@(ViewBag.CurrentNum - 1)"><span uk-pagination-previous></span></a></li>
+            }
+@*            前部分*@
+            @if (ViewBag.CurrentNum <= 4)
+            {
+                for (var j = 1; j < ViewBag.CurrentNum; j++)
+                {
+                    <li><a href="#">@j</a></li>
+                }
+            }
+            else
+            {
+                for (var j = 1; j < 4; j++)
+                {
+                    <li><a href="#">@j</a></li>
+                }
+                <li class="uk-disabled"><span>...</span></li>
+            }
+@*            中间部分*@
+            <li class="uk-active"><span>@ViewBag.CurrentNum</span></li>
+@*            后部分*@
+            @if (ViewBag.Total - ViewBag.CurrentNum <= 4)
+            {
+                for (var j = 1; j < ViewBag.Total - ViewBag.CurrentNum; j++)
+                {
+                    <li><a href="#">@(ViewBag.CurrentNum + j)</a></li>
+                }
+            }
+            else
+            {
+                for (var j = 1; j < 4; j++)
+                {
+                    <li><a href="#">@(ViewBag.CurrentNum + j)</a></li>
+                }
+                <li class="uk-disabled"><span>...</span></li>
+            }
+            <li><a href="#">@ViewBag.TotalNum</a></li>
+            @if (ViewBag.TotalNum != ViewBag.CurrentNum)
+            {
+                <li><a href="#?page=@(ViewBag.CurrentNum + 1)"><span uk-pagination-next></span></a></li>
+            }
         </ul>
+    }
+    else
+    {
+        <ul class="uk-pagination uk-flex-center" uk-margin>
+            @for (var j = 1; j <= ViewBag.TotalNum;j++)
+            {
+            
+                if (j == ViewBag.currentNum)
+                {
+                    <li class="uk-active"><span>@j</span></li>
+                }
+                else
+                {
+                    <li><a href="#?page=@j"><span uk-pagination-previous></span></a></li>
+                }
+            }
+        </ul> 
+    }
 </div>
